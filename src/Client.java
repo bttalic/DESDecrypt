@@ -11,12 +11,15 @@ public class Client {
 	public static void main(String[] args) {
 		String serverName;
 		int port;
-		if (args.length < 2) {
+		int unknown;
+		if (args.length < 3) {
 			serverName = "127.0.0.1";
 			port = 6066;
+			unknown = 4;
 		} else {
 			serverName = args[0];
 			port = Integer.parseInt(args[1]);
+			unknown = Integer.parseInt(args[2]);
 		}
 		try {
 			System.out.println("Enter key:");
@@ -46,7 +49,7 @@ public class Client {
 			out.writeBytes(key.substring(0, 4));*/
 			out.writeUTF(new String(textEncrypted));
 			System.out.println(new String(textEncrypted));
-			out.writeUTF(key.substring(0, 4));
+			out.writeUTF(key.substring(0, 8-unknown));
 
 			client.close();
 		} catch (IOException e) {

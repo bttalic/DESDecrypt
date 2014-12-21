@@ -1,5 +1,6 @@
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Scanner;
 import java.io.*;
 
@@ -14,7 +15,8 @@ import java.io.*;
  */
 public class Server extends Thread {
 	private ServerSocket serverSocket;
-
+	static Object[]  keys;
+	
 	public Server(int port) throws IOException {
 		serverSocket = new ServerSocket(port);
 		// we could use a timeout for unresponsive sockets if needed
@@ -33,7 +35,7 @@ public class Server extends Thread {
 				Socket server = serverSocket.accept();
 				System.out.println("Just connected to " + server.getRemoteSocketAddress());
 				DataInputStream in = new DataInputStream(server.getInputStream());
-
+				
 				/*int size = in.readInt();
 				byte[] encryptedText = new byte[size];
 				in.readFully(encryptedText);
@@ -51,18 +53,17 @@ public class Server extends Thread {
 				String encryptedTextString = in.readUTF();
 				byte[] encryptedText = encryptedTextString.getBytes();
 				String firstFour = in.readUTF();
+				Date startTime = new Date();
 				System.out.println("First four: "+firstFour);
 				System.out.println(encryptedTextString);
 				
-				ArrayList<String> list = new ArrayList<String>();
-				TextIO.writeUserSelectedFile();
-				DESEncryption.generateKeys("",5, list);
-				
-				for (int i = 0; i < list.size(); i++) {
-					DESEncryption.decrypt(firstFour+list.get(i), encryptedText);
+				for (int i = 0; i < keys.length; i++) {
+					if( DESEncryption.decrypt(firstFour+keys[i], encryptedText) )
+						break;
 				}
 				
-
+				Date endTime = new Date();
+				System.out.println("Total time in seconds: " + (endTime.getTime() - startTime.getTime()) / 1000);
 				server.close();
 			} catch (SocketTimeoutException s) {
 				System.out.println("Socket timed out!");
@@ -76,6 +77,10 @@ public class Server extends Thread {
 
 	public static void main(String[] args) {
 		int port = Integer.parseInt(args[0]);
+		int unknown = Integer.parseInt(args[1]);
+		ArrayList<String> list = new ArrayList<String>();
+		DESEncryption.generateKeys("",unknown+1, list);
+		keys =  list.toArray();
 		try {
 			Thread t = new Server(port);
 			t.start();
